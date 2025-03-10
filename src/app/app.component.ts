@@ -1,12 +1,14 @@
+// app.component.ts
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { HomepageComponent } from './homepage/homepage.component';  // Import HomepageComponent
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  standalone: true,  // Mark it as a standalone component
+  template: `<app-homepage></app-homepage>`,  // Use HomepageComponent directly in the template
+  styleUrls: ['./app.component.scss'],
+  imports: [HomepageComponent],  // Include HomepageComponent in the imports
 })
 export class AppComponent {
-  title = 'frontend_littleleague';
+  title = 'my-app';
 }

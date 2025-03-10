@@ -1,13 +1,18 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
+  
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "baseUrl": "./",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es2015",
+    "types": ["node"],
+    "importHelpers": true
   },
   "files": [
-    "src/main.ts"
+    "src/main.ts",
+    "src/polyfills.ts"  // Ensure this line is present
   ],
   "include": [
     "src/**/*.d.ts"

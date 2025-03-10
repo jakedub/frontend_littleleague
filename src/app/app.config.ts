@@ -1,8 +1,10 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+// app.config.ts
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';  // If using routing, import routes
 
-import { routes } from './app.routes';
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes)]
-};
+export const appConfig = [
+  provideHttpClient(),  // Add the HTTP client to the configuration
+  provideRouter(routes), // Add routing to the config
+  // Add any other necessary providers
+];
