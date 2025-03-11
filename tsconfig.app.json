@@ -1,5 +1,5 @@
 {
-  
+
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
@@ -12,7 +12,7 @@
   },
   "files": [
     "src/main.ts",
-    "src/polyfills.ts"  // Ensure this line is present
+    "src/polyfills.ts"  
   ],
   "include": [
     "src/**/*.d.ts"

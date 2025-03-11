@@ -1,14 +1,15 @@
-// app.component.ts
 import { Component } from '@angular/core';
-import { HomepageComponent } from './homepage/homepage.component';  // Import HomepageComponent
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  standalone: true,  // Mark it as a standalone component
-  template: `<app-homepage></app-homepage>`,  // Use HomepageComponent directly in the template
+  standalone: true,
+  template: `
+    <router-outlet></router-outlet> <!-- This will render the active route -->
+  `,
   styleUrls: ['./app.component.scss'],
-  imports: [HomepageComponent],  // Include HomepageComponent in the imports
+  imports: [RouterOutlet], // Import RouterOutlet to handle routing
 })
 export class AppComponent {
-  title = 'my-app';
+  title = 'Front End';
 }
