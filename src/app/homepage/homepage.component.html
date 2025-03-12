@@ -1,4 +1,35 @@
 <h1>Map with KML Markers</h1>
 
+<table>
+  <thead>
+    <tr>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Street Address</th>
+      <th>City</th>
+      <th>State</th>
+      <th>Postal Code</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Filter players with district == false -->
+    <tr *ngFor="let player of players">
+      <td *ngIf="player.district === false">{{ player.first_name }}</td>
+      <td *ngIf="player.district === false">{{ player.last_name }}</td>
+      <td *ngIf="player.district === false">{{ player.street_address }}</td>
+      <td *ngIf="player.district === false">{{ player.city }}</td>
+      <td *ngIf="player.district === false">{{ player.state }}</td>
+      <td *ngIf="player.district === false">{{ player.postal_code }}</td>
+      <td *ngIf="player.district === false">{{ player.latitude }}</td>
+      <td *ngIf="player.district === false">{{ player.longitude }}</td>
+      <td *ngIf="player.district === false">
+        {{ player.district !== undefined ? (player.district ? 'In District' : 'Outside District') : 'District Not Defined' }}
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-<div id="map" style="height: 500px;"></div>>
+<div id="map"></div>
