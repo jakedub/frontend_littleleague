@@ -1,6 +1,8 @@
 import { Component, AfterViewInit } from '@angular/core';
 import * as L from 'leaflet';  // Import Leaflet library
 import { environment } from '../../environments/environment';  // Import environment variables
+import { HttpClient } from '@angular/common/http';
+import { MarkerService } from '../marker.service';  // Import MarkerService
 
 @Component({
   selector: 'app-homepage',
@@ -10,11 +12,22 @@ import { environment } from '../../environments/environment';  // Import environ
 })
 export class HomepageComponent implements AfterViewInit {
   private map: any;
+  country_list: any[] = [];
 
-  constructor() {}
+  constructor(private http: HttpClient, private markerService: MarkerService) {
+    console.log('HttpClient Initialized');
+  }
+
+  getUsers() {
+    this.http.get("https://apip.cc/api-json/8.8.8.8").subscribe((result: any) => {
+      this.country_list = result;
+    });
+  }
 
   ngAfterViewInit(): void {
     this.initMap();
+    this.getUsers();
+    this.loadMarkers();  // Call the marker service to load markers
   }
 
   initMap(): void {
@@ -41,5 +54,71 @@ export class HomepageComponent implements AfterViewInit {
     } else {
       console.error('Map container not found');
     }
+  }
+
+  loadMarkers(): void {
+    // Fetch markers from the MarkerService and add them to the map
+    this.markerService.getMarkers().subscribe((markersData: any) => {
+      console.log('Fetched markers data:', markersData);
+  
+      if (this.map) {
+        // Check if 'coordinates' exists and is an array for markers
+        if (Array.isArray(markersData.coordinates)) {
+          console.log('Marker coordinates found:', markersData.coordinates);
+  
+          markersData.coordinates.forEach((marker: any) => {
+            const lat = marker.lat;
+            const lng = marker.lng;
+  
+            // Create a marker and add it to the map
+            L.marker([lat, lng]).addTo(this.map)
+              .bindPopup(`<b>Marker</b><br>Lat: ${lat}, Lng: ${lng}`);
+          });
+        } else {
+          console.error('Expected an array for coordinates, but received:', markersData.coordinates);
+        }
+  
+        // Check if 'polygons' exists and is an array
+        if (Array.isArray(markersData.polygons)) {
+          console.log('Polygons found:', markersData.polygons);
+  
+          markersData.polygons.forEach((polygonCoords: any) => {
+            console.log('Polygon coordinates:', polygonCoords);
+  
+            // Extract valid lat/lng pairs from the coordinate data
+            const validCoords = polygonCoords.map((coord: any) => {
+              // Ensure we are only extracting the first two elements (lat and lng)
+              if (Array.isArray(coord) && coord.length >= 2) {
+                return [coord[1], coord[0]];  // [lat, lng] assuming the data is [lng, lat, other]
+              }
+              return null;  // Return null if the coordinate is not in the expected format
+            }).filter((coord: any) => coord !== null);  // Remove invalid coordinates
+  
+            console.log('Valid polygon coordinates:', validCoords);
+  
+            if (validCoords.length > 0) {
+              // Create the polygon with valid coordinates
+              const polygon = L.polygon(validCoords, {
+                color: 'blue',       // Change color to red
+                weight: 3,
+                fillOpacity: 0.6    // Increase fillOpacity for better visibility
+              }).addTo(this.map);
+  
+              // Optional: Bind a popup to the polygon
+              polygon.bindPopup('<b>Polygon</b><br>Contains the provided coordinates.');
+  
+              // Log the polygon bounds and adjust the map view
+              console.log('Polygon bounds:', polygon.getBounds());
+              const bounds = polygon.getBounds();
+              this.map.fitBounds(bounds);  // Adjust map view to fit polygon bounds
+            } else {
+              console.error('No valid coordinates found for polygon:', polygonCoords);
+            }
+          });
+        } else {
+          console.error('Expected an array for polygons, but received:', markersData.polygons);
+        }
+      }
+    });
   }
 }
