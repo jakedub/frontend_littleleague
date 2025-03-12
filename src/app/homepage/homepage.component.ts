@@ -3,6 +3,7 @@ import * as L from 'leaflet';  // Import Leaflet library
 import { environment } from '../../environments/environment';  // Import environment variables
 import { HttpClient } from '@angular/common/http';
 import { MarkerService } from '../marker.service';  // Import MarkerService
+import { PlayerService } from '../player.service';
 
 @Component({
   selector: 'app-homepage',
@@ -12,22 +13,16 @@ import { MarkerService } from '../marker.service';  // Import MarkerService
 })
 export class HomepageComponent implements AfterViewInit {
   private map: any;
-  country_list: any[] = [];
 
-  constructor(private http: HttpClient, private markerService: MarkerService) {
+  constructor(private http: HttpClient, private markerService: MarkerService, private playerService: PlayerService) {
     console.log('HttpClient Initialized');
   }
 
-  getUsers() {
-    this.http.get("https://apip.cc/api-json/8.8.8.8").subscribe((result: any) => {
-      this.country_list = result;
-    });
-  }
 
   ngAfterViewInit(): void {
-    this.initMap();
-    this.getUsers();
+    this.initMap();;
     this.loadMarkers();  // Call the marker service to load markers
+    this.loadPlayers();
   }
 
   initMap(): void {
@@ -54,6 +49,11 @@ export class HomepageComponent implements AfterViewInit {
     } else {
       console.error('Map container not found');
     }
+  }
+  loadPlayers(): void{
+    this.playerService.getPlayers().subscribe((playersData: any) => {
+      console.log('Players Data:', playersData);
+    })
   }
 
   loadMarkers(): void {
