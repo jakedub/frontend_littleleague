@@ -1,5 +1,7 @@
-<h1>Map with KML Markers</h1>
+<h1>Players Outside District</h1>
 
+<!-- Table 1: Players Outside District with Latitude and Longitude -->
+<h2>Players Outside District (With Coordinates)</h2>
 <table>
   <thead>
     <tr>
@@ -15,21 +17,52 @@
     </tr>
   </thead>
   <tbody>
-    <!-- Filter players with district == false -->
-    <tr *ngFor="let player of players">
-      <td *ngIf="player.district === false">{{ player.first_name }}</td>
-      <td *ngIf="player.district === false">{{ player.last_name }}</td>
-      <td *ngIf="player.district === false">{{ player.street_address }}</td>
-      <td *ngIf="player.district === false">{{ player.city }}</td>
-      <td *ngIf="player.district === false">{{ player.state }}</td>
-      <td *ngIf="player.district === false">{{ player.postal_code }}</td>
-      <td *ngIf="player.district === false">{{ player.latitude }}</td>
-      <td *ngIf="player.district === false">{{ player.longitude }}</td>
-      <td *ngIf="player.district === false">
+    <!-- Filter players with district == false and valid latitude/longitude -->
+    <tr *ngFor="let player of incompletePlayers">
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.first_name }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.last_name }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.street_address }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.city }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.state }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.postal_code }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.latitude }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">{{ player.longitude }}</td>
+      <td *ngIf="player.district === false && player.latitude && player.longitude">
         {{ player.district !== undefined ? (player.district ? 'In District' : 'Outside District') : 'District Not Defined' }}
       </td>
     </tr>
   </tbody>
 </table>
+
+<!-- Table 2: Players Outside District with Missing Latitude/Longitude -->
+<h2>No Coordinates</h2>
+<table>
+  <thead>
+    <tr>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>Street Address</th>
+      <th>City</th>
+      <th>State</th>
+      <th>Postal Code</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- Filter players with district == false and missing latitude/longitude -->
+    <tr *ngFor="let player of incompletePlayers">
+      <td *ngIf="player.district === false && (!player.latitude || !player.longitude)">{{ player.first_name }}</td>
+      <td *ngIf="player.district === false && (!player.latitude || !player.longitude)">{{ player.last_name }}</td>
+      <td *ngIf="player.district === false && (!player.latitude || !player.longitude)">{{ player.street_address }}</td>
+      <td *ngIf="player.district === false && (!player.latitude || !player.longitude)">{{ player.city }}</td>
+      <td *ngIf="player.district === false && (!player.latitude || !player.longitude)">{{ player.state }}</td>
+      <td *ngIf="player.district === false && (!player.latitude || !player.longitude)">{{ player.postal_code }}</td>
+      <td *ngIf="player.district === false && (!player.latitude || !player.longitude)">
+        {{ player.district !== undefined ? (player.district ? 'In District' : 'Outside District') : 'District Not Defined' }}
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 
 <div id="map"></div>

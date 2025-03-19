@@ -1,3 +1,17 @@
+Primary Color (Cyan)
+	•	Primary: #0097A7 (Cyan 700)
+	•	Light: #4DD0E1 (Cyan 400)
+	•	Dark: #006C75 (Cyan 900)
+
+Accent Color (Orange)
+	•	Accent: #FF7043 (Deep Orange 400)
+	•	Light: #FFAB91 (Deep Orange 200)
+	•	Dark: #F4511E (Deep Orange 600)
+
+Warn Color (Red)
+	•	Warn: #D32F2F (Red 700)
+
+
 # FrontendLittleleague
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.4.

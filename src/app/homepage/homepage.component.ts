@@ -1,29 +1,80 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { Component, AfterViewInit, ViewChild } from '@angular/core';
 import * as L from 'leaflet';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { MarkerService } from '../marker.service';
-import { PlayerService } from '../player.service';
+import { MarkerService } from '../services/marker.service';
+import { PlayerService } from '../services/player.service';
+import { ExportService } from '../services/export.service';
 import { CommonModule } from '@angular/common';  // Import CommonModule for *ngFor
+import { firstValueFrom } from 'rxjs';  // Import firstValueFrom
+import { MaterialModule } from '../material.module';
+import { IncomeComponent } from '../income/income.component';
+import { DashboardComponent } from '../dashboard/dashboard.component';
+import { ExpenseComponent } from '../expense/expense.component';
+import { FundraisingComponent } from "../fundraising/fundraising.component";
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list'; 
+import { NgScrollbarModule } from 'ngx-scrollbar';
+import { Router, RouterModule } from '@angular/router';
+import { ChartComponent, ApexChart, ApexXAxis, ApexYAxis, ApexDataLabels, ApexStroke, ApexTitleSubtitle, ApexGrid, ApexLegend, ApexTooltip, ApexResponsive, ApexMarkers, ApexPlotOptions, ApexFill, ApexTheme } from "ng-apexcharts";
+import { MatPaginator } from '@angular/material/paginator'; 
+import { MatSort } from '@angular/material/sort';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { FAKE_DATA, FRUITS, NAMES, UserData } from '../shared/mock-data';
 
 @Component({
   selector: 'app-homepage',
   templateUrl: './homepage.component.html',
   styleUrls: ['./homepage.component.scss'],
   standalone: true,
-  imports: [CommonModule]  // Add CommonModule to imports
+  imports: [
+    CommonModule, 
+    MaterialModule, 
+    MatSidenavModule, 
+    MatListModule, 
+    NgScrollbarModule,
+    RouterModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatCardModule,
+    MatButtonModule,
+    MatToolbarModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatGridListModule
+  ]
 })
 export class HomepageComponent implements AfterViewInit {
+  isMenuOpen = false; // Track whether the menu is open or closed
+  showPlayerDashboard = false; // Track Player Dashboard section visibility
+  showEvaluations = false; // Track Evaluations section visibility
   private map: any;
   players: any[] = [];  // Add players array
+  incompletePlayers: any [] = [];
+  displayedColumns: string[] = ['id', 'name', 'progress', 'fruit'];
+  dataSource: MatTableDataSource<UserData> = new MatTableDataSource(); // Properly initialize dataSource
+  @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
+  @ViewChild(MatSort) sort: MatSort | null = null;
 
-  constructor(private http: HttpClient, private markerService: MarkerService, private playerService: PlayerService) {}
-
+  constructor(private http: HttpClient, private markerService: MarkerService, 
+    private playerService: PlayerService, private exportService: ExportService,
+    // dataSource = new MatTableDataSource(FAKE_DATA)
+  ) {}
   ngAfterViewInit(): void {
-    this.initMap();
-    this.loadMarkers();
-    this.loadPlayers();
+    throw new Error('Method not implemented.');
   }
+
 
   initMap(): void {
     const container = document.getElementById('map');
@@ -44,8 +95,9 @@ export class HomepageComponent implements AfterViewInit {
     }
   }
 
-  loadPlayers(): void {
-    this.playerService.getPlayers().subscribe((playersData: any) => {
+  async loadPlayers(): Promise<void> {
+    try {
+      const playersData: any = await firstValueFrom(this.playerService.getPlayers());  // Use firstValueFrom for async data fetching
       if (Array.isArray(playersData) && playersData.length > 0) {
         // Assigning the players data to the players array
         this.players = playersData;
@@ -53,14 +105,11 @@ export class HomepageComponent implements AfterViewInit {
   
         playersData.forEach((marker: any) => {
           // Log the full player data to inspect the response
-          console.log('Full Player Data:', marker);
   
           // Explicitly check for district value
           const district = marker.district;
   
           // Log the player information along with district (explicitly showing district value)
-          console.log(`Player: ${marker.first_name} ${marker.last_name}, Lat: ${marker.latitude}, Lng: ${marker.longitude}, District: ${district !== undefined ? district : 'Not Defined'}`);
-  
           if (marker.latitude && marker.longitude) {
             const lat = marker.latitude;
             const lng = marker.longitude;
@@ -76,13 +125,17 @@ export class HomepageComponent implements AfterViewInit {
             L.marker([lat, lng], { icon: playerIcon })
               .addTo(this.map)
               .bindPopup(`<b>${marker.first_name} ${marker.last_name}</b><br>Lat: ${lat}, Lng: ${lng}`);
+          } else {
+            // Add to incompletePlayers if latitude or longitude is nil
+            this.incompletePlayers.push(marker);
           }
         });
       }
-    }, (error) => {
+    } catch (error) {
       console.error('Error fetching players data:', error);
-    });
+    }
   }
+
   loadMarkers(): void {
     this.markerService.getMarkers().subscribe((markersData: any) => {
       if (this.map) {
@@ -123,29 +176,36 @@ export class HomepageComponent implements AfterViewInit {
     });
   }
 
-  loadPlayersOutsideDistrict() {
-    this.players = this.players.filter(player => !player.district);
-
-    // Add markers for players outside the district
-    this.players.forEach((marker: any) => {
-      if (marker.latitude && marker.longitude) {
-        const lat = marker.latitude;
-        const lng = marker.longitude;
-
-        const playerIcon = L.divIcon({
-          className: 'player-icon',
-          iconSize: [800, 800],
-          iconAnchor: [16, 32],
-          popupAnchor: [0, -32],
-          html: '<i class="fas fa-map-marker" style="font-size: 24px; color:green;"></i>'  // Color green for players outside district
-        });
-
-        L.marker([lat, lng], { icon: playerIcon })
-          .addTo(this.map)
-          .bindPopup(`<b>${marker.first_name} ${marker.last_name}</b><br>Lat: ${lat}, Lng: ${lng}`);
+    applyFilter(event: Event) {
+      const filterValue = (event.target as HTMLInputElement).value;
+      this.dataSource.filter = filterValue.trim().toLowerCase();
+  
+      if (this.dataSource.paginator) {
+        this.dataSource.paginator.firstPage();
       }
-    });
-
-    this.loadMarkers();
-  }
+    }
+    // function createNewUser(id: number): UserData {
+    //   const name =
+    //     NAMES[Math.round(Math.random() * (NAMES.length - 1))] +
+    //     ' ' +
+    //     NAMES[Math.round(Math.random() * (NAMES.length - 1))].charAt(0) +
+    //     '.';
+    
+    //   return {
+    //     id: id,  // Keep id as a number instead of converting to a string
+    //     name: name,
+    //     progress: Math.round(Math.random() * 100).toString(),
+    //     fruit: FRUITS[Math.round(Math.random() * (FRUITS.length - 1))],
+    //   };
+  
+    // showFiller = false;
+  
+    // ngAfterViewInit() {
+    //   if (this.paginator) {
+    //     this.dataSource.paginator = this.paginator;
+    //   }
+    //   if (this.sort) {
+    //     this.dataSource.sort = this.sort;
+    //   }
+    // }
 }
