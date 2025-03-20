@@ -7,53 +7,12 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif; 
 }
 
-/* Include the pre-built Angular Material theme */
-@import "~@angular/material/prebuilt-themes/cyan-orange.css";
 
-/* Custom styles for buttons, cards, etc. */
 
-/* Custom background color for buttons */
-.mat-raised-button {
-  background-color: #1976D2;  /* Customize with your desired color */
-  color: white;
+:root {
+  --bulma-success-h: 121deg;
+  --bulma-success-s: 85%;
+  --bulma-warning-h: 32deg;
+  --bulma-danger-l: 46%;
 }
 
-.mat-raised-button:hover {
-  background-color: #1565C0;  /* Darker shade for hover */
-}
-
-/* Custom background color for cards */
-.mat-card {
-  background-color: #ffffff;  /* Set card background */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Custom background for the sidenav */
-.mat-sidenav {
-  background-color: #0097A7;;  /* Custom color for sidenav background */
-}
-
-/* Set the mat-sidenav-container to primary color */
-.mat-sidenav-container {
-  background-color: #0097A7;  /* Primary color (cyan) */
-}
-
-/* Add additional custom styles for other components below */
-
-/* Apply default color to mat-table's background */
-.mat-table {
-    background-color: #FFAB91; /* or use your primary background color */
-  }
-  
-  /* Optionally, you can customize it further if needed */
-.mat-table .mat-table .mat-row {
-background-color: #f5f5f5; /* A light background for rows */
-}
-
-.mat-table .mat-row:hover {
-background-color: #1565C0; /* Hover effect for rows */
-}
-
-.mat-header-row {
-    background-color: #0097A7;
-}

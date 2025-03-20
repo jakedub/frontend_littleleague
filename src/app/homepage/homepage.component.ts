@@ -1,6 +1,3 @@
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSortModule } from '@angular/material/sort';
 import { Component, AfterViewInit, ViewChild } from '@angular/core';
 import * as L from 'leaflet';
 import { environment } from '../../environments/environment';
@@ -10,25 +7,12 @@ import { PlayerService } from '../services/player.service';
 import { ExportService } from '../services/export.service';
 import { CommonModule } from '@angular/common';  // Import CommonModule for *ngFor
 import { firstValueFrom } from 'rxjs';  // Import firstValueFrom
-import { MaterialModule } from '../material.module';
 import { IncomeComponent } from '../income/income.component';
-import { DashboardComponent } from '../dashboard/dashboard.component';
 import { ExpenseComponent } from '../expense/expense.component';
 import { FundraisingComponent } from "../fundraising/fundraising.component";
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list'; 
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { Router, RouterModule } from '@angular/router';
 import { ChartComponent, ApexChart, ApexXAxis, ApexYAxis, ApexDataLabels, ApexStroke, ApexTitleSubtitle, ApexGrid, ApexLegend, ApexTooltip, ApexResponsive, ApexMarkers, ApexPlotOptions, ApexFill, ApexTheme } from "ng-apexcharts";
-import { MatPaginator } from '@angular/material/paginator'; 
-import { MatSort } from '@angular/material/sort';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { FAKE_DATA, FRUITS, NAMES, UserData } from '../shared/mock-data';
 
 @Component({
@@ -38,21 +22,8 @@ import { FAKE_DATA, FRUITS, NAMES, UserData } from '../shared/mock-data';
   standalone: true,
   imports: [
     CommonModule, 
-    MaterialModule, 
-    MatSidenavModule, 
-    MatListModule, 
     NgScrollbarModule,
     RouterModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatCardModule,
-    MatButtonModule,
-    MatToolbarModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatGridListModule
   ]
 })
 export class HomepageComponent implements AfterViewInit {
@@ -63,9 +34,6 @@ export class HomepageComponent implements AfterViewInit {
   players: any[] = [];  // Add players array
   incompletePlayers: any [] = [];
   displayedColumns: string[] = ['id', 'name', 'progress', 'fruit'];
-  dataSource: MatTableDataSource<UserData> = new MatTableDataSource(); // Properly initialize dataSource
-  @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
-  @ViewChild(MatSort) sort: MatSort | null = null;
 
   constructor(private http: HttpClient, private markerService: MarkerService, 
     private playerService: PlayerService, private exportService: ExportService,
@@ -176,13 +144,13 @@ export class HomepageComponent implements AfterViewInit {
     });
   }
 
-    applyFilter(event: Event) {
-      const filterValue = (event.target as HTMLInputElement).value;
-      this.dataSource.filter = filterValue.trim().toLowerCase();
+    // applyFilter(event: Event) {
+    //   const filterValue = (event.target as HTMLInputElement).value;
+    //   this.dataSource.filter = filterValue.trim().toLowerCase();
   
-      if (this.dataSource.paginator) {
-        this.dataSource.paginator.firstPage();
-      }
+    //   if (this.dataSource.paginator) {
+    //     this.dataSource.paginator.firstPage();
+    //   }
     }
     // function createNewUser(id: number): UserData {
     //   const name =
@@ -208,4 +176,4 @@ export class HomepageComponent implements AfterViewInit {
     //     this.dataSource.sort = this.sort;
     //   }
     // }
-}
+
