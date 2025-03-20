@@ -1,0 +1,26 @@
+<!-- previous-evaluations.html -->
+<mat-accordion>
+    <mat-expansion-panel *ngFor="let evaluation of previousEvaluations" [expanded]="evaluation.expanded">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Season Year: {{ evaluation.season_year }} | Type: {{ evaluation.evaluation_type }}
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+  
+      <!-- Table inside Accordion -->
+      <table mat-table [dataSource]="evaluation.tableData" class="mat-elevation-z8">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef> Player Name </th>
+          <td mat-cell *matCellDef="let player"> {{ player.first_name }} {{ player.last_name }} </td>
+        </ng-container>
+  
+        <!-- Add other columns like hitting, fielding, etc. here -->
+  
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+  
+      <mat-paginator [length]="evaluation.tableData.length" [pageSize]="10" [pageSizeOptions]="[5, 10, 20]" (page)="pageChanged($event)">
+      </mat-paginator>
+    </mat-expansion-panel>
+  </mat-accordion>

@@ -1,0 +1,32 @@
+<div *ngIf="playersByDivision && playersByDivision[division]?.length > 0">
+  <table>
+    <tr *ngFor="let player of playersByDivision[division]">
+      <td>{{ player.first_name }} {{ player.last_name }}</td>
+      <td>{{ player.evaluation?.hitting_contact ?? 'N/A' }}</td>
+      <td>{{ player.evaluation?.fielding_form ?? 'N/A' }}</td>
+    </tr>
+  </table>
+</div>
+
+
+<!-- This works -->
+
+<div *ngFor="let division of getDivisions()">
+  <h3>{{ division }}</h3>
+  <div *ngFor="let player of playersByDivision[division]">
+    <p><strong>Name:</strong> {{ player.first_name }} {{ player.last_name }}</p>
+    <p><strong>Division:</strong> {{ player.division.name }}</p>
+
+    <div *ngIf="player.evaluation">
+      <p><strong>Hitting Contact:</strong> {{ player.evaluation.hitting_contact || 'N/A' }}</p>
+      <p><strong>Fielding Form:</strong> {{ player.evaluation.fielding_form || 'N/A' }}</p>
+      <p><strong>Fielding Glove:</strong> {{ player.evaluation.fielding_glove || 'N/A' }}</p>
+      <p><strong>Fielding Hustle:</strong> {{ player.evaluation.fielding_hustle || 'N/A' }}</p>
+      <p><strong>Throwing Form:</strong> {{ player.evaluation.throwing_form || 'N/A' }}</p>
+      <p><strong>Throwing Accuracy:</strong> {{ player.evaluation.throwing_accuracy || 'N/A' }}</p>
+      <p><strong>Pitching Speed:</strong> {{ player.evaluation.pitching_speed || 'N/A' }}</p>
+      <p><strong>Pitching Accuracy:</strong> {{ player.evaluation.pitching_accuracy || 'N/A' }}</p>
+    </div>
+    <hr>
+  </div>
+</div>
