@@ -17,10 +17,9 @@ export class EvaluationsComponent implements OnInit {
   evaluationForm!: FormGroup;
   evaluations$: Observable<any[]> = new Observable();
   players$: Observable<any[]> = new Observable();
-  divisions: string[] = [];
   evaluations: any[] = [];
   flattenedPlayers: any[] = [];
-  playersByDivision: any;
+  playersByDivision: { [division: string]: any[] } = {}; 
 
   displayedColumns: string[] = [
     'division',
@@ -50,6 +49,7 @@ export class EvaluationsComponent implements OnInit {
   ngOnInit(): void {
     this.loadPlayers();
     this.fetchEvaluations();
+    this.getDivisions();
     this.evaluationForm = this.fb.group({
       season_year: ['', Validators.required],
       evaluation_type: ['', Validators.required],
@@ -68,65 +68,56 @@ export class EvaluationsComponent implements OnInit {
   }
 
   loadPlayers(): void {
-    this.players$ = this.playerService.getPlayers();  // Call the service to get players
+    this.players$ = this.playerService.getPlayers();
     this.players$.subscribe(players => {
-      console.log('Raw Player Data:', JSON.stringify(players, null, 2));  // Log the raw JSON response
-      if (players && players.length > 0) {
-        this.divisions = Object.keys(this.playersByDivision);
-        console.log('Divisions:', this.playersByDivision);
-        this.flattenedPlayers = Object.values(this.playersByDivision).flat();
-        console.log('Flattened Players:', this.flattenedPlayers);
-      } else {
-        console.log('No players found');
-      }
+      this.flattenedPlayers = players;
     });
   }
-  fetchEvaluations(): void {
-    console.log('Fetching evaluations...');
 
-    // Use combineLatest to combine both players$ and evaluations$
+  fetchEvaluations(): void {
     combineLatest([this.players$, this.evaluationService.getEvaluations()])
       .subscribe(([players, evaluations]) => {
-        console.log('Evaluations fetched:', evaluations);  // Log evaluations data
-        console.log('Players fetched:', players);         // Log players data
-
-        this.evaluations = evaluations;  // Store evaluations array
+        this.evaluations = evaluations;
 
         players.forEach(player => {
-          // Find the evaluation for this player based on player.id
           const evaluation = this.evaluations.find(evaluation =>
             evaluation.player.id === player.id || 
             (evaluation.player.first_name === player.first_name && evaluation.player.last_name === player.last_name)
           );
 
-          // Assign the evaluation or default if not found
-          if (evaluation) {
-            player.evaluation = evaluation;
-          } else {
-            player.evaluation = {
-              hitting_power: 'N/A',
-              hitting_contact: 'N/A',
-              hitting_form: 'N/A',
-              fielding_form: 'N/A',
-              fielding_glove: 'N/A',
-              fielding_hustle: 'N/A',
-              throwing_form: 'N/A',
-              throwing_accuracy: 'N/A',
-              throwing_speed: 'N/A',
-              pitching_speed: 'N/A',
-              pitching_accuracy: 'N/A'
-            };
-          }
-
-          // Log the player and their evaluation for debugging
-          console.log(`Assigned evaluation to player ${player.first_name} ${player.last_name}: `, player.evaluation);
+          player.evaluation = evaluation || {
+            hitting_power: 'N/A',
+            hitting_contact: 'N/A',
+            hitting_form: 'N/A',
+            fielding_form: 'N/A',
+            fielding_glove: 'N/A',
+            fielding_hustle: 'N/A',
+            throwing_form: 'N/A',
+            throwing_accuracy: 'N/A',
+            throwing_speed: 'N/A',
+            pitching_speed: 'N/A',
+            pitching_accuracy: 'N/A'
+          };
         });
-
-        this.flattenedPlayers = players;  // Flatten the players list and assign
-        console.log('Flattened players:', this.flattenedPlayers);
-
-        // Call method to generate JSON response with player, division, team, and evaluations
+        this.splitAndLogPlayersByDivision(players);
       });
+  }
+  getDivisions(): string[] {
+    // Log the divisions for debugging purposes
+    console.log('Divisions:', Object.keys(this.playersByDivision));
+    return Object.keys(this.playersByDivision);
+  }
+
+  splitAndLogPlayersByDivision(players: any[]): void {
+    this.playersByDivision = this.playerDivisionService.splitPlayersByDivision(players);
+
+    // Log the players grouped by division with their evaluations
+    Object.keys(this.playersByDivision).forEach(division => {
+      console.log(`Division: ${division}`);
+      this.playersByDivision[division].forEach((player: { first_name: any; last_name: any; evaluation: any; }) => {
+        console.log(`Player: ${player.first_name} ${player.last_name}, Evaluation: `, player.evaluation);
+      });
+    });
   }
 
 

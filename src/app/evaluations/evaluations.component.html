@@ -1,42 +1,47 @@
 <div *ngIf="evaluations.length > 0; else noEvaluations">
   <h2 class="title is-2">All Evaluations</h2>
-  <table class="table is-striped is-bordered is-hoverable">
-    <thead>
-      <tr>
-        <th>Player</th>
-        <th>Hitting Power</th>
-        <th>Hitting Contact</th>
-        <th>Hitting Form</th>
-        <th>Fielding Form</th>
-        <th>Fielding Glove</th>
-        <th>Fielding Hustle</th>
-        <th>Throwing Form</th>
-        <th>Throwing Accuracy</th>
-        <th>Throwing Speed</th>
-        <th>Pitching Speed</th>
-        <th>Pitching Accuracy</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let evaluation of evaluations">
-        <td>{{ evaluation.player.first_name }} {{ evaluation.player.last_name }}</td>
-        <td>{{ evaluation.hitting_power }}</td>
-        <td>{{ evaluation.hitting_contact }}</td>
-        <td>{{ evaluation.hitting_form }}</td>
-        <td>{{ evaluation.fielding_form }}</td>
-        <td>{{ evaluation.fielding_glove }}</td>
-        <td>{{ evaluation.fielding_hustle }}</td>
-        <td>{{ evaluation.throwing_form }}</td>
-        <td>{{ evaluation.throwing_accuracy }}</td>
-        <td>{{ evaluation.throwing_speed }}</td>
-        <td>{{ evaluation.pitching_speed }}</td>
-        <td>{{ evaluation.pitching_accuracy }}</td>
-      </tr>
-    </tbody>
-  </table>
+  
+  <div *ngFor="let division of getDivisions()">
+    <h3 class="title is-3">{{ division }}</h3>
+
+    <table class="table is-striped is-bordered is-hoverable">
+      <thead>
+        <tr>
+          <th>Player</th>
+          <th>Hitting Power</th>
+          <th>Hitting Contact</th>
+          <th>Hitting Form</th>
+          <th>Fielding Form</th>
+          <th>Fielding Glove</th>
+          <th>Fielding Hustle</th>
+          <th>Throwing Form</th>
+          <th>Throwing Accuracy</th>
+          <th>Throwing Speed</th>
+          <th>Pitching Speed</th>
+          <th>Pitching Accuracy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let player of playersByDivision[division]">
+          <td>{{ player.first_name }} {{ player.last_name }}</td>
+          <td>{{ player.evaluation.hitting_power }}</td>
+          <td>{{ player.evaluation.hitting_contact }}</td>
+          <td>{{ player.evaluation.hitting_form }}</td>
+          <td>{{ player.evaluation.fielding_form }}</td>
+          <td>{{ player.evaluation.fielding_glove }}</td>
+          <td>{{ player.evaluation.fielding_hustle }}</td>
+          <td>{{ player.evaluation.throwing_form }}</td>
+          <td>{{ player.evaluation.throwing_accuracy }}</td>
+          <td>{{ player.evaluation.throwing_speed }}</td>
+          <td>{{ player.evaluation.pitching_speed }}</td>
+          <td>{{ player.evaluation.pitching_accuracy }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <!-- If no evaluations are available -->
 <ng-template #noEvaluations>
-  <p>No evaluations available.</p>
+  <p class="has-text-centered">No evaluations available.</p>
 </ng-template>
