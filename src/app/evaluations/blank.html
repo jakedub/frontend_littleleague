@@ -1,32 +1,42 @@
-<div *ngIf="playersByDivision && playersByDivision[division]?.length > 0">
-  <table>
-    <tr *ngFor="let player of playersByDivision[division]">
-      <td>{{ player.first_name }} {{ player.last_name }}</td>
-      <td>{{ player.evaluation?.hitting_contact ?? 'N/A' }}</td>
-      <td>{{ player.evaluation?.fielding_form ?? 'N/A' }}</td>
+<pre>{{ playersByDivision | json }}</pre>
+<table class="table is-striped is-bordered is-hoverable">
+  <thead class="has-background-primary has-text-white">
+    <tr>
+      <th>Name</th>
+      <th>Hitting Power</th>
+      <th>Hitting Contact</th>
+      <th>Hitting Form</th>
+      <th>Fielding Form</th>
+      <th>Fielding Glove</th>
+      <th>Fielding Hustle</th>
+      <th>Throwing Form</th>
+      <th>Throwing Accuracy</th>
+      <th>Throwing Speed</th>
+      <th>Pitching Speed</th>
+      <th>Pitching Accuracy</th>
     </tr>
-  </table>
-</div>
-
-
-<!-- This works -->
-
-<div *ngFor="let division of getDivisions()">
-  <h3>{{ division }}</h3>
-  <div *ngFor="let player of playersByDivision[division]">
-    <p><strong>Name:</strong> {{ player.first_name }} {{ player.last_name }}</p>
-    <p><strong>Division:</strong> {{ player.division.name }}</p>
-
-    <div *ngIf="player.evaluation">
-      <p><strong>Hitting Contact:</strong> {{ player.evaluation.hitting_contact || 'N/A' }}</p>
-      <p><strong>Fielding Form:</strong> {{ player.evaluation.fielding_form || 'N/A' }}</p>
-      <p><strong>Fielding Glove:</strong> {{ player.evaluation.fielding_glove || 'N/A' }}</p>
-      <p><strong>Fielding Hustle:</strong> {{ player.evaluation.fielding_hustle || 'N/A' }}</p>
-      <p><strong>Throwing Form:</strong> {{ player.evaluation.throwing_form || 'N/A' }}</p>
-      <p><strong>Throwing Accuracy:</strong> {{ player.evaluation.throwing_accuracy || 'N/A' }}</p>
-      <p><strong>Pitching Speed:</strong> {{ player.evaluation.pitching_speed || 'N/A' }}</p>
-      <p><strong>Pitching Accuracy:</strong> {{ player.evaluation.pitching_accuracy || 'N/A' }}</p>
-    </div>
-    <hr>
-  </div>
-</div>
+  </thead>
+  <tbody>
+    <!-- Loop through each division -->
+    <ng-container *ngFor="let division of divisions">
+      <tr>
+        <td colspan="12"><strong>{{ division }}</strong></td>
+      </tr>
+      <!-- Ensure players exist for this division -->
+      <tr *ngFor="let player of playersByDivision?.[division]">
+        <td>{{ player.first_name }} {{ player.last_name }}</td>
+        <td>{{ player?.evaluation?.hitting_power || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.hitting_contact || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.hitting_form || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.fielding_form || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.fielding_glove || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.fielding_hustle || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.throwing_form || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.throwing_accuracy || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.throwing_speed || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.pitching_speed || 'N/A' }}</td>
+        <td>{{ player?.evaluation?.pitching_accuracy || 'N/A' }}</td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>

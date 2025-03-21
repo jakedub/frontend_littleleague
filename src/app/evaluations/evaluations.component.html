@@ -1,45 +1,42 @@
-<div *ngFor="let division of divisions">
-  <h3>{{ division }}</h3>
-
-  <!-- Add a fallback to see if players are being looped through -->
-  <div *ngIf="playersByDivision[division] && playersByDivision[division].length > 0">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Hitting Power</th>
-          <th>Hitting Contact</th>
-          <th>Fielding Form</th>
-          <th>Fielding Glove</th>
-          <th>Fielding Hustle</th>
-          <th>Throwing Form</th>
-          <th>Throwing Accuracy</th>
-          <th>Throwing Speed</th>
-          <th>Pitching Speed</th>
-          <th>Pitching Accuracy</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let player of playersByDivision[division]">
-          <td>{{ player.first_name }} {{ player.last_name }}</td>
-          <td>{{ player?.evaluation?.hitting_power || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.hitting_contact || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.fielding_form || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.fielding_glove || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.fielding_hustle || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.throwing_form || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.throwing_accuracy || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.throwing_speed || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.pitching_speed || 'N/A' }}</td>
-          <td>{{ player?.evaluation?.pitching_accuracy || 'N/A' }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div *ngIf="!playersByDivision[division] || playersByDivision[division].length === 0">
-    <p>No players found in this division.</p>
-  </div>
-
-  <hr> <!-- Add a separator between division tables -->
+<div *ngIf="evaluations.length > 0; else noEvaluations">
+  <h2 class="title is-2">All Evaluations</h2>
+  <table class="table is-striped is-bordered is-hoverable">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>Hitting Power</th>
+        <th>Hitting Contact</th>
+        <th>Hitting Form</th>
+        <th>Fielding Form</th>
+        <th>Fielding Glove</th>
+        <th>Fielding Hustle</th>
+        <th>Throwing Form</th>
+        <th>Throwing Accuracy</th>
+        <th>Throwing Speed</th>
+        <th>Pitching Speed</th>
+        <th>Pitching Accuracy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let evaluation of evaluations">
+        <td>{{ evaluation.player.first_name }} {{ evaluation.player.last_name }}</td>
+        <td>{{ evaluation.hitting_power }}</td>
+        <td>{{ evaluation.hitting_contact }}</td>
+        <td>{{ evaluation.hitting_form }}</td>
+        <td>{{ evaluation.fielding_form }}</td>
+        <td>{{ evaluation.fielding_glove }}</td>
+        <td>{{ evaluation.fielding_hustle }}</td>
+        <td>{{ evaluation.throwing_form }}</td>
+        <td>{{ evaluation.throwing_accuracy }}</td>
+        <td>{{ evaluation.throwing_speed }}</td>
+        <td>{{ evaluation.pitching_speed }}</td>
+        <td>{{ evaluation.pitching_accuracy }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
+
+<!-- If no evaluations are available -->
+<ng-template #noEvaluations>
+  <p>No evaluations available.</p>
+</ng-template>

@@ -7,18 +7,17 @@ import { PlayerService } from '../services/player.service';
 import { ExportService } from '../services/export.service';
 import { CommonModule } from '@angular/common';  // Import CommonModule for *ngFor
 import { firstValueFrom } from 'rxjs';  // Import firstValueFrom
-import { PlayerCombined } from '../models/player-combined.model';
 
 @Component({
   selector: 'app-homepage',
   templateUrl: './player-dashboard.component.html',
-  styleUrls: ['./player-dashboard.component.scss'],
+  styleUrls: ['./player-dashboard.component.css'],
   standalone: true,
   imports: [CommonModule]  // Add CommonModule to imports
 })
 export class PlayerAddressComponent implements AfterViewInit {
   private map: any;
-  players: PlayerCombined[] = [];  // Add players array
+  players: any[] = [];  // Add players array
   incompletePlayers: any [] = [];
 
   constructor(private http: HttpClient, private markerService: MarkerService, 
@@ -50,40 +49,46 @@ export class PlayerAddressComponent implements AfterViewInit {
     }
   }
 
-async loadPlayers(): Promise<void> {
-  try {
-    const playersData: PlayerCombined[] = await firstValueFrom(this.playerService.getPlayers());
-    if (Array.isArray(playersData) && playersData.length > 0) {
-      this.players = playersData;
-      console.log('All players data:', this.players);  // Verify if players data is assigned correctly
-
-      playersData.forEach((player: PlayerCombined) => {
-        const district = player.district;  // Access district from PlayerCombined
-
-        if (player.latitude && player.longitude) {
-          const lat = player.latitude;
-          const lng = player.longitude;
-
-          const playerIcon = L.divIcon({
-            className: 'player-icon',
-            iconSize: [800, 800],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -32],
-            html: `<i class="fas fa-map-marker" style="font-size: 24px; color:${district ? 'gold' : 'green'};"></i>`
-          });
-
-          L.marker([lat, lng], { icon: playerIcon })
-            .addTo(this.map)
-            .bindPopup(`<b>${player.first_name} ${player.last_name}</b><br>Lat: ${lat}, Lng: ${lng}`);
-        } else {
-          this.incompletePlayers.push(player);  // Add to incompletePlayers if coordinates are missing
-        }
-      });
+  async loadPlayers(): Promise<void> {
+    try {
+      const playersData: any = await firstValueFrom(this.playerService.getPlayers());  // Use firstValueFrom for async data fetching
+      if (Array.isArray(playersData) && playersData.length > 0) {
+        // Assigning the players data to the players array
+        this.players = playersData;
+        console.log('All players data:', this.players);  // Verify if players data is assigned correctly
+  
+        playersData.forEach((marker: any) => {
+          // Log the full player data to inspect the response
+  
+          // Explicitly check for district value
+          const district = marker.district;
+  
+          // Log the player information along with district (explicitly showing district value)
+          if (marker.latitude && marker.longitude) {
+            const lat = marker.latitude;
+            const lng = marker.longitude;
+  
+            const playerIcon = L.divIcon({
+              className: 'player-icon',
+              iconSize: [800, 800],
+              iconAnchor: [16, 32],
+              popupAnchor: [0, -32],
+              html: '<i class="fas fa-map-marker" style="font-size: 24px; color:' + (district ? 'gold' : 'green') + ';"></i>'
+            });
+  
+            L.marker([lat, lng], { icon: playerIcon })
+              .addTo(this.map)
+              .bindPopup(`<b>${marker.first_name} ${marker.last_name}</b><br>Lat: ${lat}, Lng: ${lng}`);
+          } else {
+            // Add to incompletePlayers if latitude or longitude is nil
+            this.incompletePlayers.push(marker);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching players data:', error);
     }
-  } catch (error) {
-    console.error('Error fetching players data:', error);
   }
-}
 
   loadMarkers(): void {
     this.markerService.getMarkers().subscribe((markersData: any) => {

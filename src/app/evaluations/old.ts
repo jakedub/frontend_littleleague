@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { EvaluationService } from '../services/evaluation.service';
 import { PlayerService } from '../services/player.service';
 import { PlayerDivisionService } from '../services/player-division.service';
 import { CommonModule } from '@angular/common';
-import { Observable, combineLatest } from 'rxjs';
+import { Observable } from 'rxjs';
+import Tablesort from 'tablesort';
 
 @Component({
   selector: 'app-evaluations',
@@ -13,31 +14,21 @@ import { Observable, combineLatest } from 'rxjs';
   imports: [CommonModule],
   styleUrls: ['./evaluations.component.scss']
 })
-export class EvaluationsComponent implements OnInit {
+export class EvaluationsComponent implements OnInit, AfterViewChecked {
   evaluationForm!: FormGroup;
+  players$: Observable<PlayerCombined[]> = new Observable();
   evaluations$: Observable<any[]> = new Observable();
-  players$: Observable<any[]> = new Observable();
+  playersByDivision: { [division: string]: PlayerCombined[] } = {};
   divisions: string[] = [];
   evaluations: any[] = [];
   flattenedPlayers: any[] = [];
-  playersByDivision: any;
+  tableInitialized = false;
 
   displayedColumns: string[] = [
-    'division',
-    'rank',
-    'name',
-    'hitting_power',
-    'hitting_contact',
-    'hitting_form',
-    'fielding_form',
-    'fielding_glove',
-    'fielding_hustle',
-    'throwing_form',
-    'throwing_accuracy',
-    'throwing_speed',
-    'total_sum',
-    'pitching_speed',
-    'pitching_accuracy'
+    'division', 'rank', 'name', 'hitting_power', 'hitting_contact', 
+    'hitting_form', 'fielding_form', 'fielding_glove', 'fielding_hustle', 
+    'throwing_form', 'throwing_accuracy', 'throwing_speed', 'total_sum', 
+    'pitching_speed', 'pitching_accuracy'
   ];
 
   constructor(
@@ -48,7 +39,6 @@ export class EvaluationsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadPlayers();
     this.fetchEvaluations();
     this.evaluationForm = this.fb.group({
       season_year: ['', Validators.required],
@@ -65,70 +55,83 @@ export class EvaluationsComponent implements OnInit {
       pitching_speed: ['', [Validators.required, Validators.min(1), Validators.max(5)]],
       pitching_accuracy: ['', [Validators.min(1), Validators.max(5)]]
     });
+
+    this.loadPlayers();
   }
 
-  loadPlayers(): void {
-    this.players$ = this.playerService.getPlayers();  // Call the service to get players
-    this.players$.subscribe(players => {
-      console.log('Raw Player Data:', JSON.stringify(players, null, 2));  // Log the raw JSON response
-      if (players && players.length > 0) {
-        this.divisions = Object.keys(this.playersByDivision);
-        console.log('Divisions:', this.playersByDivision);
-        this.flattenedPlayers = Object.values(this.playersByDivision).flat();
-        console.log('Flattened Players:', this.flattenedPlayers);
-      } else {
-        console.log('No players found');
+  ngAfterViewChecked(): void {
+    if (!this.tableInitialized) {
+      const table = document.getElementById('division-table');
+      if (table) {
+        new Tablesort(table);
+        this.tableInitialized = true; // Ensure Tablesort is only applied once
       }
-    });
+    }
   }
   fetchEvaluations(): void {
-    console.log('Fetching evaluations...');
-
-    // Use combineLatest to combine both players$ and evaluations$
-    combineLatest([this.players$, this.evaluationService.getEvaluations()])
-      .subscribe(([players, evaluations]) => {
-        console.log('Evaluations fetched:', evaluations);  // Log evaluations data
-        console.log('Players fetched:', players);         // Log players data
-
-        this.evaluations = evaluations;  // Store evaluations array
-
+    this.evaluations$ = this.evaluationService.getEvaluations();
+    this.evaluations$.subscribe((evaluations) => {
+      this.evaluations = evaluations;
+      console.log('Evaluations:', this.evaluations); // Log evaluations data for inspection
+  
+      this.players$.subscribe(players => {
+        console.log('Players before processing:', players); // Log players data to inspect player.id
+  
         players.forEach(player => {
-          // Find the evaluation for this player based on player.id
-          const evaluation = this.evaluations.find(evaluation =>
-            evaluation.player.id === player.id || 
-            (evaluation.player.first_name === player.first_name && evaluation.player.last_name === player.last_name)
-          );
-
-          // Assign the evaluation or default if not found
-          if (evaluation) {
-            player.evaluation = evaluation;
+          console.log(`Processing Player ID: ${player.id} - Name: ${player.first_name} ${player.last_name}`);
+  
+          // Ensure that player has evaluations and find the most relevant evaluation
+          const playerEvaluations = evaluations.filter(evaluation => evaluation.player_id === player.id);
+  
+          if (playerEvaluations.length > 0) {
+            // If there are multiple evaluations, select the most recent one based on created_at or season_year
+            const latestEvaluation = playerEvaluations.sort((a, b) => {
+              // Sort evaluations by season_year (or created_at) to get the most recent evaluation
+              return b.season_year - a.season_year;
+            })[0];
+  
+            // Assign the selected evaluation to the player
+            player.evaluation = { ...latestEvaluation };
           } else {
+            // If no evaluation found, assign default values
+            console.log(`No evaluation found for ${player.first_name} ${player.last_name}, assigning default values.`);
             player.evaluation = {
-              hitting_power: 'N/A',
-              hitting_contact: 'N/A',
-              hitting_form: 'N/A',
-              fielding_form: 'N/A',
-              fielding_glove: 'N/A',
-              fielding_hustle: 'N/A',
-              throwing_form: 'N/A',
-              throwing_accuracy: 'N/A',
-              throwing_speed: 'N/A',
-              pitching_speed: 'N/A',
-              pitching_accuracy: 'N/A'
+              id: 0,
+              player_id: player.id,
+              season_year: 0,
+              evaluation_type: 'beginning',  // Default evaluation type
+              created_at: new Date().toISOString(),
+              hitting_power: 0,
+              hitting_contact: 0,
+              hitting_form: 0,
+              fielding_form: 0,
+              fielding_glove: 0,
+              fielding_hustle: 0,
+              throwing_form: 0,
+              throwing_accuracy: 0,
+              throwing_speed: 0,
+              pitching_speed: 0,
+              pitching_accuracy: 0
             };
           }
-
-          // Log the player and their evaluation for debugging
-          console.log(`Assigned evaluation to player ${player.first_name} ${player.last_name}: `, player.evaluation);
         });
-
-        this.flattenedPlayers = players;  // Flatten the players list and assign
-        console.log('Flattened players:', this.flattenedPlayers);
-
-        // Call method to generate JSON response with player, division, team, and evaluations
+  
+        // Ensure proper grouping of players into divisions
+        this.playersByDivision = this.playerDivisionService.splitPlayersByDivision(players);
+        this.divisions = Object.keys(this.playersByDivision);
+  
+        console.log('Players with Evaluations after processing:', this.playersByDivision); // Log the final players with their evaluations
       });
+    });
   }
-
+  loadPlayers(): void {
+    this.players$ = this.playerService.getPlayers();
+    console.log('load players', this.players$)
+    this.players$.subscribe(players => {
+      this.playersByDivision = this.playerDivisionService.splitPlayersByDivision(players);
+      this.divisions = Object.keys(this.playersByDivision); 
+    });
+  }
 
   applyFilters(event?: Event): void {
     const filterValue = event ? (event.target as HTMLInputElement).value.toLowerCase() : '';
@@ -152,22 +155,6 @@ export class EvaluationsComponent implements OnInit {
     });
 
     this.flattenedPlayers = this.evaluations;
-  }
-
-  calculateTotalHitting(row: any): number {
-    return row.hitting_power + row.hitting_contact + row.hitting_form;
-  }
-
-  calculateTotalFielding(row: any): number {
-    return row.fielding_form + row.fielding_glove + row.fielding_hustle;
-  }
-
-  calculateTotalThrowing(row: any): number {
-    return row.throwing_form + row.throwing_accuracy + row.throwing_speed;
-  }
-
-  calculateTotalPitching(row: any): number {
-    return row.pitching_accuracy + row.pitching_speed;
   }
 
   calculateTotalSum(row: any): number {
